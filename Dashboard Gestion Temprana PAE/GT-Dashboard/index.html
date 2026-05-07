@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAE · Reliability & Maintenance · Gestión Temprana</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body data-theme="light">
+
+  <!-- ============== PANTALLA DE BIENVENIDA ============== -->
+  <section id="welcome" class="welcome hidden">
+    <div class="welcome-bg-grid"></div>
+    <div class="welcome-inner">
+      <img src="assets/pae-logo.svg" class="welcome-logo-img" alt="PAE">
+      <h1>Reliability &amp; Maintenance</h1>
+      <p class="welcome-sub">Gestión Temprana de Proyectos · Dashboard Ejecutivo</p>
+      <div id="dropzone" class="dropzone">
+        <div class="dropzone-icon">📂</div>
+        <p class="dropzone-title">Arrastrá los Excel acá o hacé clic</p>
+        <p class="dropzone-sub">Aceptamos los dos archivos a la vez (.xlsx)</p>
+        <input type="file" id="fileInputWelcome" accept=".xlsx" multiple hidden>
+      </div>
+      <div class="welcome-actions">
+        <button id="btnImportCacheWelcome" class="btn btn-ghost" title="Restaurar desde gtd-cache.json">📥 Importar caché (.json)</button>
+        <button id="btnLinkCacheWelcome" class="btn btn-ghost" title="Vincular gtd-cache.json para auto-cargar (Chromium)">🔗 Vincular caché</button>
+        <input type="file" id="fileInputCacheWelcome" accept=".json" hidden>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== APP PRINCIPAL ============== -->
+  <div id="app" class="app hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <button id="btnSidebarToggle" class="icon-btn" title="Colapsar">☰</button>
+        <img src="assets/pae-logo.svg" class="sidebar-logo-img" alt="PAE">
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="generales">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">Proyectos Generales</span>
+        </button>
+        <button class="nav-item" data-view="wellpads">
+          <span class="nav-icon">🔩</span>
+          <span class="nav-label">Gestión Wellpads</span>
+        </button>
+      </nav>
+
+      <hr class="sidebar-sep">
+
+      <div class="sidebar-metrics">
+        <p class="sidebar-section-title">Métricas SAP / GR</p>
+
+        <div class="mini-card">
+          <div class="mini-icon">🔧</div>
+          <div class="mini-body">
+            <span class="mini-label">Equipos SAP</span>
+            <span class="mini-value mono" id="miniEquipos">0</span>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <div class="mini-icon">📋</div>
+          <div class="mini-body">
+            <span class="mini-label">Planes Mtto</span>
+            <span class="mini-value mono" id="miniPlanes">0</span>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <div class="mini-icon">💰</div>
+          <div class="mini-body">
+            <span class="mini-label">Monto GR</span>
+            <span class="mini-value mono" id="miniMonto">$0</span>
+          </div>
+        </div>
+
+        <div class="lateral-monto-card">
+          <p class="lateral-monto-title">MONTO TOTAL POR Z</p>
+          <div class="ug-toggle ug-toggle--4col" id="ugToggleLateral" role="group" aria-label="Selector de UG">
+            <button type="button" class="ug-toggle-btn" data-ug="GSJ">GSJ</button>
+            <button type="button" class="ug-toggle-btn" data-ug="NQN">NQN</button>
+            <button type="button" class="ug-toggle-btn" data-ug="ACA">ACA</button>
+            <button type="button" class="ug-toggle-btn ug-toggle-btn--todos active" data-ug="TODOS">TODOS</button>
+          </div>
+          <ul class="z-monto-list" id="lateralMontoZList">
+            <li><span class="z-tag">Z1</span><span class="z-amount mono" id="latZ1">$0</span></li>
+            <li><span class="z-tag">Z3</span><span class="z-amount mono" id="latZ3">$0</span></li>
+            <li><span class="z-tag">Z6</span><span class="z-amount mono" id="latZ6">$0</span></li>
+            <li><span class="z-tag">ZA</span><span class="z-amount mono" id="latZA">$0</span></li>
+            <li><span class="z-tag">ZI</span><span class="z-amount mono" id="latZI">$0</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <span class="sidebar-foot-tag">PAE · R&amp;M · 2026</span>
+      </div>
+    </aside>
+
+    <!-- Área principal -->
+    <main class="main">
+
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <div class="header-titles">
+            <h2 id="headerTitle">RELIABILITY &amp; MAINTENANCE</h2>
+            <span class="header-subtitle">Gestión Temprana de Proyectos</span>
+          </div>
+          <span class="header-meta" id="headerMeta">— sin datos —</span>
+        </div>
+        <div class="header-right">
+          <div class="theme-switcher" id="themeSwitcher" role="group" aria-label="Tema">
+            <button class="theme-btn" data-theme="light" title="Tema claro">☀</button>
+            <button class="theme-btn" data-theme="medium" title="Tema medio">◐</button>
+            <button class="theme-btn" data-theme="dark" title="Tema oscuro">☾</button>
+          </div>
+          <button id="btnUpdate" class="btn btn-primary" title="Cargar/actualizar Excel">
+            📂 Actualizar Excel
+          </button>
+          <button id="btnExportPDF" class="btn btn-primary" title="Exportar Reporte Ejecutivo (PDF)">
+            📄 Exportar PDF
+          </button>
+          <input type="file" id="fileInputHeader" accept=".xlsx" multiple hidden>
+          <button id="btnExportOverrides" class="btn btn-ghost" title="Exportar JSON de ediciones">
+            ⬇
+          </button>
+          <button id="btnImportOverrides" class="btn btn-ghost" title="Importar JSON de ediciones">
+            ⬆
+          </button>
+          <input type="file" id="fileInputOverrides" accept=".json" hidden>
+          <button id="btnExportCache" class="btn btn-ghost" title="Exportar caché completa (gtd-cache.json)">
+            💾
+          </button>
+          <button id="btnImportCacheHeader" class="btn btn-ghost" title="Importar caché (gtd-cache.json)">
+            📥
+          </button>
+          <input type="file" id="fileInputCacheHeader" accept=".json" hidden>
+        </div>
+      </header>
+
+      <!-- Filter Bar -->
+      <section class="filterbar" id="filterbar">
+        <div class="filter-group">
+          <label>UG</label>
+          <select id="fltUG"><option value="">Todos</option></select>
+        </div>
+        <div class="filter-group">
+          <label>Estado</label>
+          <select id="fltEstado"><option value="">Todos</option></select>
+        </div>
+        <div class="filter-group">
+          <label>Año</label>
+          <select id="fltAnio"><option value="">Todos</option></select>
+        </div>
+        <div class="filter-group filter-group--name">
+          <label>Nombre del Proyecto</label>
+          <input type="search" id="fltNombre" list="nombresProyectos" placeholder="Buscar proyecto…" autocomplete="off">
+          <datalist id="nombresProyectos"></datalist>
+        </div>
+
+        <span id="vistaTagGenerales" class="vista-tag vista-tag--proyectos" style="margin:0 auto;">PROYECTOS</span>
+        <span id="vistaTagWellpads" class="vista-tag vista-tag--wellpad hidden" style="margin:0 auto;">WELLPAD</span>
+
+        <button id="btnClearFilters" class="btn btn-ghost btn-sm">Limpiar</button>
+      </section>
+
+      <!-- KPI Strip (4 KPIs principales) -->
+      <section class="kpi-strip" id="kpiStrip"></section>
+
+      <!-- Grilla de gráficos: 4 cards arriba (UG, MontoGR, Equipos SAP, Planes Mtto) + Curva S abajo -->
+      <section class="chart-grid">
+        <div class="chart-card chart-card--gray">
+          <div class="chart-card-head">
+            <h3 class="chart-title">Distribución por UG</h3>
+            <span class="chart-badge">Proyectos</span>
+          </div>
+          <div id="chartDonutUG" class="chart-area"></div>
+        </div>
+
+        <div class="chart-card chart-card--gray">
+          <div class="chart-card-head">
+            <h3 class="chart-title">Críticos vs No Críticos</h3>
+            <span class="chart-badge">Cantidad</span>
+          </div>
+          <div id="chartCriticidadBarras" class="chart-area"></div>
+        </div>
+
+        <div class="chart-card chart-card--gray">
+          <div class="chart-card-head">
+            <h3 class="chart-title">Monto total GR</h3>
+            <div class="gr-controls">
+              <div class="gr-toggle" role="group" aria-label="Tipo de monto">
+                <button type="button" class="gr-toggle-btn" data-tipo="ROT">ROT</button>
+                <button type="button" class="gr-toggle-btn" data-tipo="AIEC">AIEC</button>
+                <button type="button" class="gr-toggle-btn active" data-tipo="TODOS">TODOS</button>
+              </div>
+            </div>
+          </div>
+          <div id="chartBarrasGR" class="chart-area"></div>
+        </div>
+
+        <div class="chart-card chart-card--gray">
+          <div class="chart-card-head">
+            <h3 class="chart-title">Alta de Equipos en SAP</h3>
+            <span class="chart-badge">Cantidad</span>
+          </div>
+          <div id="chartEquiposUG" class="chart-area"></div>
+        </div>
+
+        <div class="chart-card chart-card--gray">
+          <div class="chart-card-head">
+            <h3 class="chart-title">Alta Planes Mtto SAP</h3>
+            <span class="chart-badge">Cantidad</span>
+          </div>
+          <div id="chartPlanesUG" class="chart-area"></div>
+        </div>
+
+        <div class="chart-card span-3">
+          <div class="chart-card-head">
+            <h3 class="chart-title">Todos Proyectos GT</h3>
+            <span class="chart-badge gradient">CURVA S - PLAN VS REAL</span>
+          </div>
+          <div id="chartCurvaTodos" class="chart-area chart-hero" style="min-height: 275px;"></div>
+        </div>
+      </section>
+
+      <!-- Tabla -->
+      <section class="table-section">
+        <div class="table-header">
+          <h3>Proyectos</h3>
+          <input type="search" id="tblSearch" placeholder="🔍 Buscar por nombre…" class="table-search">
+          <span class="table-count" id="tblCount">0 proyectos</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="proyectos-table" id="proyectosTable"></table>
+        </div>
+        <div class="table-pagination" id="tblPagination"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal" id="modal"></div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- ============== LIBRERÍAS LOCALES ============== -->
+  <script src="assets/libs/xlsx.full.min.js"></script>
+  <script src="assets/libs/apexcharts.min.js"></script>
+  <script src="assets/libs/html2canvas.min.js"></script>
+  <script src="assets/libs/jspdf.umd.min.js"></script>
+
+  <!-- ============== CÓDIGO DASHBOARD ============== -->
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/overrides.js"></script>
+  <script src="assets/js/transforms.js"></script>
+  <script src="assets/js/filters.js"></script>
+  <script src="assets/js/kpis.js"></script>
+  <script src="assets/js/charts.js"></script>
+  <script src="assets/js/table.js"></script>
+  <script src="assets/js/modal.js"></script>
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/pdfReport.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
